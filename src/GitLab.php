@@ -78,7 +78,7 @@ class GitLab
 		} catch (\Gitlab\Exception\RuntimeException $e) {
 			// If adding has failed because of SUDO (author does not have access to the project), create an issue without SUDO (as the Admin user whose token is configured)
 			if ($this->isAdmin) {
-				$issue = $this->doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, false);
+				$issue = $this->doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, $confidential, false);
 			} else {
 				// If adding has failed for some other reason, propagate the exception back
 				throw $e;
@@ -206,5 +206,10 @@ class GitLab
 	public function getUrl() {
 		return $this->url;
 	}
+
+    public function getClient()
+    {
+        return $this->client;
+    }
 }
 ?>

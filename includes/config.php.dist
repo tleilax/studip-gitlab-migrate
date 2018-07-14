@@ -1,11 +1,17 @@
 <?php
 return [
+    // Temp paths
+    'temp-path' => '/tmp/studip-svn-git',
+
     // Trac
-    'trac-url'   => 'https://<username>:<password>@develop.studip.de/trac/login',
-    'trac-query' => 'id=8682',
+    'trac-url'      => 'https://<username>:<password>@develop.studip.de/trac/login',
+    'trac-query'    => 'version=trunk&order=id&resolution=fixed&resolution=wontfix&resolution=duplicate&resolution=worksforme',
+    'trac-revision' =>  47000, // 43791 <- 4.0 started here
+    'trac-users'    => __DIR__ . '/trac-users.txt',
 
     // GitLab
-    'gitlab-url'          => 'http://gitlabdev01.virt.uni-oldenburg.de',
+    'gitlab-api-url'      => 'http://gitlabdev01.virt.uni-oldenburg.de',
+    'gitlab-repo-url'     => 'git@gitlabdev01.virt.uni-oldenburg.de:studip/trunk.git',
     'gitlab-project'      => 'studip/trunk',
     'gitlab-access-token' => '<gitlab-token>',
     'gitlab-admin-token'  => true,

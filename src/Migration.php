@@ -10,8 +10,8 @@ namespace Trac2GitLab;
 class Migration
 {
 	// Communicators
-	private $gitLab;
-	private $trac;
+	public $gitLab;
+	public $trac;
 	// Configuration
 	private $addLinkToOriginalTicket;
 	private $userMapping;
@@ -92,7 +92,7 @@ class Migration
 	 * @param  array     $openTickets               Array of Trac tickets to be migrated
 	 * @param  string    $gitLabProject             GitLab project in which the issues should be created
 	 */
-	private function migrate($openTickets, $gitLabProject) {
+	public function migrate($openTickets, $gitLabProject) {
         $mapping = [];
 		foreach($openTickets as $ticket) {
 			$originalTicketId = $ticket[0];
@@ -108,7 +108,7 @@ class Migration
 			$labels = $ticket[3]['keywords'];
             $dateCreated = $ticket[3]['time']['__jsonclass__'][1];
             $dateUpdated = $ticket[3]['_ts'];
-            $confidential = $ticket[3]['sensitive'];
+            $confidential = (bool) @$ticket[3]['sensitive'];
 
             $attachments = $this->trac->getAttachments($originalTicketId);
 
@@ -162,7 +162,7 @@ class Migration
 	 * @return  string
 	 */
 	// Adapted from: https://gitlab.dyomedea.com/vdv/trac-to-gitlab/blob/master/trac2down/Trac2Down.py
-	private function translateTracToMarkdown($text) {
+	public function translateTracToMarkdown($text) {
 		$text = str_replace("\r\n", "\n", $text);
 		// Inline code block
 		$text = preg_replace('/{{{(.*?)}}}/', '`$1`', $text);

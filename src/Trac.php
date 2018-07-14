@@ -48,7 +48,6 @@ class Trac
 		$ticketIds = $this->client->execute('ticket.query', array($query));
 		foreach($ticketIds as $id) {
 			$tickets[$id] = $this->getTicket($id);
-			$tickets[$id][] = $this->getComments($id);
 		}
 		return $tickets;
 	}
@@ -111,5 +110,10 @@ class Trac
 	public function getUrl() {
 		return $this->url;
 	}
+
+    public function getClient()
+    {
+        return $this->client;
+    }
 }
 ?>
