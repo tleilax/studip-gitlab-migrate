@@ -4,6 +4,8 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/includes/functions.php';
 
 $config = require __DIR__ . '/includes/config.php';
+$config['trac-clean-url'] = preg_replace('/(?<=:\/\/).*?:.*?@|\/login/', '${1}', $config['trac-url']);
+
 $steps  = [
     'issues'   => __DIR__ . '/steps/convert-tickets-to-issues.php',
     'commits'  => __DIR__ . '/steps/clone-svn-repository.php',

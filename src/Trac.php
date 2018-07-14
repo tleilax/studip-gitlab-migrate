@@ -72,8 +72,8 @@ class Trac
 
             $result[] = [
                 'filename' => $attachment[0],
-                'content' => $data['__jsonclass__'][1],
-                'author' => $attachment[4]
+                'content'  => $data['__jsonclass__'][1],
+                'author'   => $attachment[4]
             ];
 
         }

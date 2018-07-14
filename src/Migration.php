@@ -96,7 +96,7 @@ class Migration
         $mapping = [];
 		foreach($openTickets as $ticket) {
 			$originalTicketId = $ticket[0];
-			$title = $ticket[3]['summary'];
+			$title = $ticket[3]['summary'] ?: '¯\_(ツ)_/¯';
 			$description = $this->translateTracToMarkdown($ticket[3]['description']);
 			if ($this->addLinkToOriginalTicket) {
 				$description .= "\n\n---\n\nOriginal ticket: " . $this->trac->getUrl() . '/ticket/' . $originalTicketId;

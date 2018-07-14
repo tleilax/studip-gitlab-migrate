@@ -96,13 +96,13 @@ class GitLab
      */
 	public function closeIssue($projectId, $issueId, $time = '', $author = '') {
 		$this->client->api('issues')->update($projectId, $issueId,
-			[
+			array_filter([
 				'state_event' => 'close',
 				'updated_at' => $time,
 				'closed_at' => $time,
 				'closed_by_id' => $author,
 				'closed_by' => $author
-			]);
+			]));
 	}
 
 	/**
@@ -161,7 +161,7 @@ class GitLab
 
         } catch (\Gitlab\Exception\RuntimeException $e) {
             // If adding has failed because of SUDO (author does not have access to the project), create an issue without SUDO (as the Admin user whose token is configured)
-            if ($this->isAdmin) {
+            if ($this->isAdmin && isset($data)) {
                 $note = $this->doCreateNote($projectId, $issueId, $data['markdown'], $authorId, false);
             } else {
                 // If adding has failed for some other reason, propagate the exception back
