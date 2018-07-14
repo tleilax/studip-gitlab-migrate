@@ -24,6 +24,7 @@ $getopt = new Getopt(array(
     array('v', 'version', Getopt::NO_ARGUMENT, 'Just shows the version')
 ));
 
+$issue_mapping = [];
 try {
     $getopt->parse();
 
@@ -55,11 +56,11 @@ try {
 	$migration = new Migration($getopt->getOption('gitlab'), $getopt->getOption('token'), $getopt->getOption('admin'), $getopt->getOption('trac'), $getopt->getOption('link'), $userMapping);
 	// If we have a component, migrate it
 	if (!is_null($getopt->getOption('component'))) {
-		$migration->migrateComponent($getopt->getOption('component'), $getopt->getOption('project'));
+		$issue_mapping = $migration->migrateComponent($getopt->getOption('component'), $getopt->getOption('project'));
 	}
 	// If we have a custom query, migrate it
 	if (!is_null($getopt->getOption('query'))) {
-		$migration->migrateQuery($getopt->getOption('query'), $getopt->getOption('project'));
+		$issue_mapping = $migration->migrateQuery($getopt->getOption('query'), $getopt->getOption('project'));
 	}
 } catch (UnexpectedValueException $e) {
     echo "Error: ".$e->getMessage()."\n";

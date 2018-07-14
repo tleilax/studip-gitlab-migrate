@@ -43,7 +43,7 @@ class Migration
      */
 	public function migrateComponent($tracComponentName, $gitLabProject) {
 		$openTickets = $this->trac->listOpenTicketsForComponent($tracComponentName);
-		$this->migrate($openTickets, $gitLabProject);
+		return $this->migrate($openTickets, $gitLabProject);
 	}
 
 	/**
@@ -54,7 +54,7 @@ class Migration
      */
 	public function migrateQuery($tracQuery, $gitLabProject) {
 		$openTickets = $this->trac->listTicketsForQuery($tracQuery);
-		$this->migrate($openTickets, $gitLabProject);
+		return $this->migrate($openTickets, $gitLabProject);
 	}
 
 	/**
@@ -93,6 +93,7 @@ class Migration
 	 * @param  string    $gitLabProject             GitLab project in which the issues should be created
 	 */
 	private function migrate($openTickets, $gitLabProject) {
+        $mapping = [];
 		foreach($openTickets as $ticket) {
 			$originalTicketId = $ticket[0];
 			$title = $ticket[3]['summary'];
@@ -115,6 +116,8 @@ class Migration
 
 			echo 'Created a GitLab issue #' . $issue['iid'] . ' for Trac ticket #' . $originalTicketId . ' : ' . $this->gitLab->getUrl() . '/' . $gitLabProject . '/issues/' . $issue['iid'] . "\n";
 
+            $mapping[$originalTicketId] = $issue['iid'];
+
 			// If there are comments on the ticket, create notes on the issue
 			/*if (is_array($ticket[4]) && count($ticket[4])) {
 				foreach($ticket[4] as $comment) {
@@ -126,6 +129,7 @@ class Migration
 				echo "\tAlso created " . count($ticket[4]) . " note(s)\n";
 			}*/
 		}
+        return $mapping;
 	}
 
 	/**
