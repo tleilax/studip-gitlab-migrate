@@ -110,7 +110,6 @@ class Migration
             $dateUpdated = $ticket[3]['_ts'];
 
             $attachments = $this->trac->getAttachments($originalTicketId);
-            print_r($attachments);
 
 			$issue = $this->gitLab->createIssue($gitLabProject, $title, $description, $dateCreated, $assigneeId, $creatorId, $labels);
 
@@ -128,6 +127,20 @@ class Migration
 				}
 				echo "\tAlso created " . count($ticket[4]) . " note(s)\n";
 			}*/
+
+			/*
+			 * Add files attached to Trac ticket to new Gitlab issue.
+			 */
+			foreach ($attachments as $a) {
+
+				$file = file_put_contents($a['filename'], $a['content']['__jsonclass__'][1]);
+
+				$this->gitLab->createIssueAttachment($gitLabProject, $issue['id'], $a['filename'], $a['author']);
+                unlink($a['filename']);
+
+                echo "\tAttached file " . $a['filename'] . " to issue " . $issue['id'] . ".\n";
+            }
+
 		}
         return $mapping;
 	}

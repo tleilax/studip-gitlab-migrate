@@ -7,10 +7,12 @@ use Trac2GitLab\Migration;
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
 
+define('GITLAB_PRIVATE_TOKEN', 'zBCqafqiWotFzaPYinQu');
+
 $getopt = new Getopt(array(
 	array('t', 'trac', Getopt::REQUIRED_ARGUMENT, 'Trac URL'),
     array('g', 'gitlab', Getopt::REQUIRED_ARGUMENT, 'GitLab URL'),
-    array('k', 'token', Getopt::REQUIRED_ARGUMENT, 'GitLab API private token'),
+    array('k', 'token', Getopt::OPTIONAL_ARGUMENT, 'GitLab API private token'),
     array('p', 'project', Getopt::REQUIRED_ARGUMENT, 'GitLab project to which the tickets should be migrated'),
 
     // Both are optional, but at least must be present:
@@ -34,7 +36,7 @@ try {
     }
 
     // Validate the parameters
-    validateRequired($getopt, array('trac', 'gitlab', 'token', 'project'));
+    validateRequired($getopt, array('trac', 'gitlab', 'project'));
     if (is_null($getopt->getOption('component')) && is_null($getopt->getOption('query'))) {
     	throw new UnexpectedValueException("At least one of 'component' or 'query' must have a value");
     }
@@ -53,7 +55,7 @@ try {
     }
 
     // Actually migrate
-	$migration = new Migration($getopt->getOption('gitlab'), $getopt->getOption('token'), $getopt->getOption('admin'), $getopt->getOption('trac'), $getopt->getOption('link'), $userMapping);
+	$migration = new Migration($getopt->getOption('gitlab'), $getopt->getOption('token') ?: GITLAB_PRIVATE_TOKEN, $getopt->getOption('admin'), $getopt->getOption('trac'), $getopt->getOption('link'), $userMapping);
 	// If we have a component, migrate it
 	if (!is_null($getopt->getOption('component'))) {
 		$issue_mapping = $migration->migrateComponent($getopt->getOption('component'), $getopt->getOption('project'));

@@ -7,6 +7,7 @@ define('USER_FETCH_MAX_PAGES', 50);
 
 use Gitlab\Client;
 use Gitlab\Model\Issue;
+use Gitlab\HttpClient\Builder;
 
 /**
  * GitLab communicator class
@@ -28,7 +29,7 @@ class GitLab
      */
 	public function __construct($url, $token, $isAdmin) {
 		$this->url = $url;
-		$this->client = new Client($url . "/api/v3/");
+        $this->client = Client::create($url . '/api/v4/');
 		$this->client->authenticate($token, Client::AUTH_URL_TOKEN);
 		$this->isAdmin = $isAdmin;
 	}
@@ -110,7 +111,25 @@ class GitLab
 		return $note;
 	}
 
-    public function createAttachment($projectId, $file) {
+    /**
+	 * Attaches a file to an issue.
+	 *
+     * @param mixed $projectId numerical ID or path to target project
+	 * @param int $issueId the issue to add the file to
+     * @param string $file base64 representation of file, we'll see if that works.
+     * @param int $authorId the file author
+     */
+	public function createIssueAttachment($projectId, $issueId, $file, $authorId) {
+		try {
+			// First, add file to project.
+            $data = $this->client->api('projects')->uploadFile($projectId, $file);
+
+			// Add the uploaded file as a note on the given issue.
+            return $this->createNote($projectId, $issueId, $data['markdown'], $authorId);
+
+        } catch (\Gitlab\Exception\RuntimeException $e) {
+			throw $e;
+		}
     }
 
 	// Actually creates the issue
