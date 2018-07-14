@@ -3,3 +3,7 @@ trac-to-gitlab.phar
 
 vendor/*
 !vendor/m4tthumphrey/
+
+
+# JetBrains
+.idea
