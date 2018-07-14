@@ -1,5 +1,8 @@
 trac-to-gitlab.phar
 vendor/
+puli.phar
+puli.json
+.puli/
 
 # JetBrains
 .idea
