@@ -125,7 +125,20 @@ class GitLab
             $data = $this->client->api('projects')->uploadFile($projectId, $file);
 
 			// Add the uploaded file as a note on the given issue.
-            return $this->createNote($projectId, $issueId, $data['markdown'], $authorId);
+            $note = $this->createNote($projectId, $issueId, $data['markdown'], $authorId);
+
+			// Update possible mentions of this file in issue description.
+			$issue = $this->client->api('issues')->show($projectId, $issueId);
+
+			$description = str_replace(
+				'[[br]]',
+				'<br>',
+				preg_replace('/!\[image\]\((.+),.*\)/U', $data['markdown'], $issue['description'])
+			);
+
+			$this->client->api('issues')->update($projectId, $issueId, ['description' => $description]);
+
+			return $note;
 
         } catch (\Gitlab\Exception\RuntimeException $e) {
 			throw $e;

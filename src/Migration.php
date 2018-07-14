@@ -128,9 +128,12 @@ class Migration
 				echo "\tAlso created " . count($ticket[4]) . " note(s)\n";
 			}*/
 
-			/*
-			 * Add files attached to Trac ticket to new Gitlab issue.
-			 */
+			// Map old image filenames to new markdown links
+			$images = [];
+
+            /*
+             * Add files attached to Trac ticket to new Gitlab issue.
+             */
 			foreach ($attachments as $a) {
 
 				file_put_contents($a['filename'], base64_decode($a['content']));
