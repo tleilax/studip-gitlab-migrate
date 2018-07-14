@@ -91,10 +91,17 @@ class GitLab
      * @param mixed $projectId project ID or path
      * @param int $issueId issue to close
      * @param string $time time in ISO8601 format
+	 * @param string $author wh closed the issue?
      */
-	public function closeIssue($projectId, $issueId, $time) {
+	public function closeIssue($projectId, $issueId, $time = '', $author = '') {
 		$this->client->api('issues')->update($projectId, $issueId,
-			['state_event' => 'close', 'updated_at' => $time]);
+			[
+				'state_event' => 'close',
+				'updated_at' => $time,
+				'closed_at' => $time,
+				'closed_by_id' => $author,
+				'closed_by' => $author
+			]);
 	}
 
 	/**
