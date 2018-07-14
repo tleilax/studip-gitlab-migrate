@@ -1,9 +1,5 @@
 trac-to-gitlab.phar
-!vendor/
-
-vendor/*
-!vendor/m4tthumphrey/
-
+vendor/
 
 # JetBrains
 .idea
