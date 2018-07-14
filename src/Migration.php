@@ -128,9 +128,6 @@ class Migration
 				echo "\tAlso created " . count($ticket[4]) . " note(s)\n";
 			}*/
 
-			// Map old image filenames to new markdown links
-			$images = [];
-
             /*
              * Add files attached to Trac ticket to new Gitlab issue.
              */
@@ -143,6 +140,11 @@ class Migration
 
                 echo "\tAttached file " . $a['filename'] . " to issue " . $issue['iid'] . ".\n";
             }
+
+			// Close issue if Trac ticket was closed.
+			if ($ticket[3]['status'] === 'closed') {
+				$this->gitLab->closeIssue($gitLabProject, $issue['iid'], $dateUpdated);
+			}
 
 		}
         return $mapping;

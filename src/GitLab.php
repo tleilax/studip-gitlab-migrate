@@ -86,6 +86,17 @@ class GitLab
 		return $issue;
 	}
 
+    /**
+	 * Closes an issue.
+     * @param mixed $projectId project ID or path
+     * @param int $issueId issue to close
+     * @param string $time time in ISO8601 format
+     */
+	public function closeIssue($projectId, $issueId, $time) {
+		$this->client->api('issues')->update($projectId, $issueId,
+			['state_event' => 'close', 'updated_at' => $time]);
+	}
+
 	/**
 	 * Creates a new note in the given project and on the given issue id (NOTE: id, not iid). When working in admin mode, tries to create the note
 	 * as the given author (SUDO) and if that fails, tries creating the note again as the admin.
