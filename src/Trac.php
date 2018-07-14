@@ -13,7 +13,7 @@ class Trac
 {
     private $client;
     private $url;
-    
+
     /**
      * Constructor
      *
@@ -62,6 +62,22 @@ class Trac
 	public function getTicket($id) {
 		return $this->client->execute('ticket.get', array($id));
 	}
+
+    public function getAttachments($id) {
+        $result = [];
+        $attachments = $this->client->execute('ticket.listAttachments', [$id]);
+
+        foreach ($attachments as $attachment) {
+            $result[] = [
+                'filename' => $attachment[0],
+                'content' => $this->client->execute('ticket.getAttachment', [$id, $attachment[0]]),
+                'author' => $attachment[4]
+            ];
+
+        }
+
+        return $result;
+    }
 
 	/**
      * Returns an array of comments on an individual ticket.

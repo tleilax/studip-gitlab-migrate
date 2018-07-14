@@ -16,7 +16,7 @@ $getopt = new Getopt(array(
     // Both are optional, but at least must be present:
     array('c', 'component', Getopt::OPTIONAL_ARGUMENT, 'Migrate open tickets of a specific Trac component'),
     array('q', 'query', Getopt::OPTIONAL_ARGUMENT, 'Migrate all tickets matching this Trac query (e.g. "id=1234" or "status=!closed&owner=dachaz")'),
-    
+
     // Trully optional
     array('m', 'map', Getopt::OPTIONAL_ARGUMENT, 'Map of trac usernames to git usernames in the following format "tracUserA=gitUserX,tracUserB=gitUserY"'),
     array('a', 'admin', Getopt::NO_ARGUMENT, 'Indicates that the GitLab token is from an admin user and as such tries to migrate the ticket reporter as well. If the reporter is not part of the provided GitLab project, the reporter will be set to the Admin user owning the token.'),
@@ -57,7 +57,7 @@ try {
 	if (!is_null($getopt->getOption('component'))) {
 		$migration->migrateComponent($getopt->getOption('component'), $getopt->getOption('project'));
 	}
-	// If we have a custom query, migrate it 
+	// If we have a custom query, migrate it
 	if (!is_null($getopt->getOption('query'))) {
 		$migration->migrateQuery($getopt->getOption('query'), $getopt->getOption('project'));
 	}

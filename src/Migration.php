@@ -17,7 +17,7 @@ class Migration
 	private $userMapping;
 	// Cache
 	private $gitLabUsers;
-    
+
 	/**
      * Constructor
      *
@@ -85,7 +85,7 @@ class Migration
 		$this->gitLabUsers = $this->gitLab->listUsers();
 	}
 
-	
+
 	/**
 	 * Performs the actual migration.
 	 *
@@ -105,13 +105,18 @@ class Migration
 			$assigneeId = is_array($gitLabAssignee) ? $gitLabAssignee['id'] : null;
 			$creatorId = is_array($gitLabCreator) ? $gitLabCreator['id'] : null;
 			$labels = $ticket[3]['keywords'];
-			
-			$issue = $this->gitLab->createIssue($gitLabProject, $title, $description, $assigneeId, $creatorId, $labels);
+            $dateCreated = $ticket[3]['time']['__jsonclass__'][1];
+            $dateUpdated = $ticket[3]['_ts'];
+
+            $attachments = $this->trac->getAttachments($originalTicketId);
+            print_r($attachments);
+
+			$issue = $this->gitLab->createIssue($gitLabProject, $title, $description, $dateCreated, $assigneeId, $creatorId, $labels);
 
 			echo 'Created a GitLab issue #' . $issue['iid'] . ' for Trac ticket #' . $originalTicketId . ' : ' . $this->gitLab->getUrl() . '/' . $gitLabProject . '/issues/' . $issue['iid'] . "\n";
 
 			// If there are comments on the ticket, create notes on the issue
-			if (is_array($ticket[4]) && count($ticket[4])) {
+			/*if (is_array($ticket[4]) && count($ticket[4])) {
 				foreach($ticket[4] as $comment) {
 					$commentAuthor = $this->getGitLabUser($comment['author']);
 					$commentAuthorId = is_array($commentAuthor) ? $commentAuthor['id'] : null;
@@ -119,7 +124,7 @@ class Migration
 					$note = $this->gitLab->createNote($gitLabProject, $issue['id'], $commentText, $commentAuthorId);
 				}
 				echo "\tAlso created " . count($ticket[4]) . " note(s)\n";
-			}
+			}*/
 		}
 	}
 

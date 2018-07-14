@@ -1,2 +1,5 @@
 trac-to-gitlab.phar
-vendor/
+!vendor/
+
+vendor/*
+!vendor/m4tthumphrey/

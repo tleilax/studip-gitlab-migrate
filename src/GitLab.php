@@ -35,7 +35,7 @@ class GitLab
 
 
 	/**
- 	 * Tries to fetch all the users from GitLab. Will get at most 
+ 	 * Tries to fetch all the users from GitLab. Will get at most
  	 * (USER_FETCH_PAGE_SIZE * USER_FETCH_MAX_PAGES) users. Returns
  	 * a map of {username => userInfoObject}
  	 *
@@ -63,19 +63,20 @@ class GitLab
 	 * @param  mixed    $projectId    Numeric project id (e.g. 17) or the unique string identifier (e.g. 'dachaz/trac-to-gitlab')
      * @param  string   $title        Title of the new issue
      * @param  string   $description  Description of the new issue
+     * @param  string     $createdAt    Custom creation date
      * @param  int      $assigneeId   Numeric user id of the user asigned to the issue. Can be null.
      * @param  int      $authorId     Numeric user id of the user who created the issue. Only used in admin mode. Can be null.
      * @param  array    $labels       Array of string labels to be attached to the issue. Analoguous to trac keywords.
      * @return  Gitlab\Model\Issue
 	 */
-	public function createIssue($projectId, $title, $description, $assigneeId, $authorId, $labels) {
+	public function createIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels) {
 		try {
 			// Try to add, potentially as an admin (SUDO authorId)
-			$issue = $this->doCreateIssue($projectId, $title, $description, $assigneeId, $authorId, $labels, $this->isAdmin);
+			$issue = $this->doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, $this->isAdmin);
 		} catch (\Gitlab\Exception\RuntimeException $e) {
 			// If adding has failed because of SUDO (author does not have access to the project), create an issue without SUDO (as the Admin user whose token is configured)
 			if ($this->isAdmin) {
-				$issue = $this->doCreateIssue($projectId, $title, $description, $assigneeId, $authorId, $labels, false);
+				$issue = $this->doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, false);
 			} else {
 				// If adding has failed for some other reason, propagate the exception back
 				throw $e;
@@ -109,13 +110,17 @@ class GitLab
 		return $note;
 	}
 
+    public function createAttachment($projectId, $file) {
+    }
+
 	// Actually creates the issue
-	private function doCreateIssue($projectId, $title, $description, $assigneeId, $authorId, $labels, $isAdmin) {
+	private function doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, $isAdmin) {
 		$issueProperties = array(
 			'title' => $title,
 			'description' => $description,
 			'assignee_id' => $assigneeId,
-			'labels' => $labels
+			'labels' => $labels,
+            'created_at' => $createdAt
 		);
 		if ($isAdmin) {
 			$issueProperties['sudo'] = $authorId;

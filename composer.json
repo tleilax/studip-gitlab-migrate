@@ -15,7 +15,7 @@
     	"php": ">=5.3.0",
         "ext-mbstring": "*",
         "ext-json": "*",
-        "m4tthumphrey/php-gitlab-api": "7.13.0",
+        //"m4tthumphrey/php-gitlab-api": "7.13.0",
         "fguillot/json-rpc": "1.0.0",
         "ulrichsg/getopt-php": "2.3.0"
     },
