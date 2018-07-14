@@ -1,0 +1,15 @@
+<?php
+return [
+    // Trac
+    'trac-url'   => 'https://<username>:<password>@develop.studip.de/trac/login',
+    'trac-query' => 'id=8682',
+
+    // GitLab
+    'gitlab-url'          => 'http://gitlabdev01.virt.uni-oldenburg.de',
+    'gitlab-project'      => 'studip/trunk',
+    'gitlab-access-token' => '<gitlab-token>',
+    'gitlab-admin-token'  => true,
+
+    // Conversion settings
+    'create-trac-links' => true,
+];

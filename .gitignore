@@ -1,8 +1,10 @@
+includes/config.php
+
 trac-to-gitlab.phar
-vendor/
+vendor/*
 puli.phar
 puli.json
 .puli/
 
-# JetBrains
 .idea
+composer.lock
