@@ -68,9 +68,11 @@ class Trac
         $attachments = $this->client->execute('ticket.listAttachments', [$id]);
 
         foreach ($attachments as $attachment) {
+            $data = $this->client->execute('ticket.getAttachment', [$id, $attachment[0]]);
+
             $result[] = [
                 'filename' => $attachment[0],
-                'content' => $this->client->execute('ticket.getAttachment', [$id, $attachment[0]]),
+                'content' => $data['__jsonclass__'][1],
                 'author' => $attachment[4]
             ];
 

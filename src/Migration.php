@@ -123,7 +123,7 @@ class Migration
 					$commentAuthor = $this->getGitLabUser($comment['author']);
 					$commentAuthorId = is_array($commentAuthor) ? $commentAuthor['id'] : null;
 					$commentText = $this->translateTracToMarkdown($comment['text']);
-					$note = $this->gitLab->createNote($gitLabProject, $issue['id'], $commentText, $commentAuthorId);
+					$note = $this->gitLab->createNote($gitLabProject, $issue['iid'], $commentText, $commentAuthorId);
 				}
 				echo "\tAlso created " . count($ticket[4]) . " note(s)\n";
 			}*/
@@ -133,12 +133,12 @@ class Migration
 			 */
 			foreach ($attachments as $a) {
 
-				$file = file_put_contents($a['filename'], $a['content']['__jsonclass__'][1]);
+				file_put_contents($a['filename'], base64_decode($a['content']));
 
-				$this->gitLab->createIssueAttachment($gitLabProject, $issue['id'], $a['filename'], $a['author']);
+				$this->gitLab->createIssueAttachment($gitLabProject, $issue['iid'], $a['filename'], $a['author']);
                 unlink($a['filename']);
 
-                echo "\tAttached file " . $a['filename'] . " to issue " . $issue['id'] . ".\n";
+                echo "\tAttached file " . $a['filename'] . " to issue " . $issue['iid'] . ".\n";
             }
 
 		}

@@ -48,7 +48,7 @@ class GitLab
 		$page = 1;
 		// Stop when we either have all users or we have exhausted the sane number of attempts
 		while (!$gotAll && $page < USER_FETCH_MAX_PAGES) {
-			$response = $this->client->api('users')->all(null, $page++, USER_FETCH_PAGE_SIZE);
+			$response = $this->client->api('users')->all([], $page++, USER_FETCH_PAGE_SIZE);
 			foreach($response as $user) {
 				$users[$user['username']] = $user;
 				// We assume that 'Administrator' user is in there
