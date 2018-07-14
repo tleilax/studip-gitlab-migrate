@@ -22,6 +22,7 @@ class Trac
 	public function __construct($url) {
 		$this->url = $url;
 		$this->client = new Client($url . "/jsonrpc");
+        $this->url =  preg_replace('/(?<=:\/\/).*?:.*?@|\/login/', '${1}', $this->url);
 	}
 
     /**
