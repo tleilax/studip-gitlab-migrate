@@ -108,12 +108,16 @@ class Migration
 			$labels = $ticket[3]['keywords'];
             $dateCreated = $ticket[3]['time']['__jsonclass__'][1];
             $dateUpdated = $ticket[3]['_ts'];
+            $confidential = $ticket[3]['sensitive'];
 
             $attachments = $this->trac->getAttachments($originalTicketId);
 
-			$issue = $this->gitLab->createIssue($gitLabProject, $title, $description, $dateCreated, $assigneeId, $creatorId, $labels);
+			$issue = $this->gitLab->createIssue($gitLabProject, $title,
+				$description, $dateCreated, $assigneeId, $creatorId, $labels,
+				$confidential);
 
-			echo 'Created a GitLab issue #' . $issue['iid'] . ' for Trac ticket #' . $originalTicketId . ' : ' . $this->gitLab->getUrl() . '/' . $gitLabProject . '/issues/' . $issue['iid'] . "\n";
+			echo 'Created a GitLab issue #' . $issue['iid'] . ' for Trac ticket #' . $originalTicketId . ' : ' .
+				$this->gitLab->getUrl() . '/' . $gitLabProject . '/issues/' . $issue['iid'] . "\n";
 
             $mapping[$originalTicketId] = $issue['iid'];
 

@@ -68,12 +68,13 @@ class GitLab
      * @param  int      $assigneeId   Numeric user id of the user asigned to the issue. Can be null.
      * @param  int      $authorId     Numeric user id of the user who created the issue. Only used in admin mode. Can be null.
      * @param  array    $labels       Array of string labels to be attached to the issue. Analoguous to trac keywords.
+	 * @param  bool     $confidential Is this issue confidential?
      * @return  Gitlab\Model\Issue
 	 */
-	public function createIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels) {
+	public function createIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, $confidential = false) {
 		try {
 			// Try to add, potentially as an admin (SUDO authorId)
-			$issue = $this->doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, $this->isAdmin);
+			$issue = $this->doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, $confidential, $this->isAdmin);
 		} catch (\Gitlab\Exception\RuntimeException $e) {
 			// If adding has failed because of SUDO (author does not have access to the project), create an issue without SUDO (as the Admin user whose token is configured)
 			if ($this->isAdmin) {
@@ -170,7 +171,7 @@ class GitLab
     }
 
 	// Actually creates the issue
-	private function doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, $isAdmin) {
+	private function doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, $confidential, $isAdmin) {
 		$issueProperties = array(
 			'title' => $title,
 			'description' => $description,
@@ -178,6 +179,9 @@ class GitLab
 			'labels' => $labels,
             'created_at' => $createdAt
 		);
+		if ($confidential) {
+			$issueProperties['confidential'] = true;
+        }
 		if ($isAdmin) {
 			$issueProperties['sudo'] = $authorId;
 		}
