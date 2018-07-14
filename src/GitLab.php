@@ -159,7 +159,13 @@ class GitLab
 			return $note;
 
         } catch (\Gitlab\Exception\RuntimeException $e) {
-			throw $e;
+            // If adding has failed because of SUDO (author does not have access to the project), create an issue without SUDO (as the Admin user whose token is configured)
+            if ($this->isAdmin) {
+                $note = $this->doCreateNote($projectId, $issueId, $data['markdown'], $authorId, false);
+            } else {
+                // If adding has failed for some other reason, propagate the exception back
+                throw $e;
+            }
 		}
     }
 
