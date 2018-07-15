@@ -132,17 +132,25 @@ class Migration
 				echo "\tAlso created " . count($ticket[4]) . " note(s)\n";
 			}*/
 
+			/*
+			 * Create a transliterator for treating file names with special
+			 * characters in them.
+			 */
+			$trans = \Transliterator::create('Latin-ASCII');
             /*
              * Add files attached to Trac ticket to new Gitlab issue.
              */
 			foreach ($attachments as $a) {
 
-				file_put_contents($a['filename'], base64_decode($a['content']));
+				// Transliterate file name, using only "safe" characters.
+				$filename = $trans->transliterate($a['filename']);
 
-				$this->gitLab->createIssueAttachment($gitLabProject, $issue['iid'], $a['filename'], $a['author']);
-                unlink($a['filename']);
+				file_put_contents($filename, base64_decode($a['content']));
 
-                echo "\tAttached file " . $a['filename'] . " to issue " . $issue['iid'] . ".\n";
+				$this->gitLab->createIssueAttachment($gitLabProject, $issue['iid'], $filename, $a['author']);
+                unlink($filename);
+
+                echo "\tAttached file " . $filename . " to issue " . $issue['iid'] . ".\n";
             }
 
 			// Close issue if Trac ticket was closed.
