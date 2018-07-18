@@ -12,7 +12,7 @@
         }
     ],
     "require": {
-    	"php": ">=5.3.0",
+    	"php": ">=5.6.0",
         "ext-mbstring": "*",
         "ext-json": "*",
         "m4tthumphrey/php-gitlab-api": "9.9.0",

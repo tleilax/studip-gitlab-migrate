@@ -115,5 +115,23 @@ class Trac
     {
         return $this->client;
     }
+
+    /**
+	 * Fetches all existing milestone names.
+     * @return array
+     */
+    public function getMilestones() {
+		return $this->client->execute('ticket.milestone.getAll');
+	}
+
+    /**
+	 * Gets the milestone with the given name.
+     * @param string $name
+	 * @return array
+     */
+	public function getMilestone($name) {
+		return $this->client->execute('ticket.milestone.get', [$name]);
+	}
+
 }
 ?>

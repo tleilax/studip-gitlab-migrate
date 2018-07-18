@@ -20,6 +20,11 @@ $gitlab_users = $gitlab->listUsers();
 
 $step_size = 50;
 $page = 1;
+// Trac Milestones that have already been created in Gitlab.
+$milestones = [];
+// Milestones that have already been migrated and closed.
+$closedMilestones = [];
+
 do {
     $query = "{$config['trac-query']}&page={$page}&max={$step_size}";
     try {
@@ -27,6 +32,7 @@ do {
     } catch (Exception $e) {
         $ticket_ids = [];
     }
+
 
     foreach ($ticket_ids as $ticket_id) {
         try {
@@ -44,9 +50,34 @@ do {
             $dateUpdated = $ticket[3]['_ts'];
             $confidential = (bool) @$ticket[3]['sensitive'];
 
-            $issue = $gitlab->createIssue($config['gitlab-project'], $title,
+            // Check if milestone must be created.
+            if (is_array($ticket[3]) && isset($ticket[3]['milestone']) && $ticket[3]['milestone'] !== '') {
+                /*
+                 * Create a new milestone in Gitlab and use its ID it if
+                 * it doesn't exist in Gitlab yet.
+                 */
+                if (!isset($milestones[$ticket[3]['milestone']]) || !is_array($milestones[$ticket[3]['milestone']])) {
+                    $m = $trac->getMilestone($ticket[3]['milestone']);
+                    $g = $gitlab->createMilestone($config['gitlab-project'], $m['name'],
+                        translateTracToMarkdown($m['description'], $trac->getUrl()),
+                        is_array($m['due']) ? $m['due']['__jsonclass__'][1] : '', '');
+
+                    $milestones[$ticket[3]['milestone']] = [
+                        'id' => $g['id'],
+                        'closed' => is_array($m['completed'])
+                    ];
+                    echo "Created milestone " . $ticket[3]['milestone'] . ".\n";
+                }
+            }
+
+            $milestone = is_array($ticket[3]) &&
+                    $ticket[3]['milestone'] !== '' &&
+                    $milestones[$ticket[3]['milestone']] ?
+                $milestones[$ticket[3]['milestone']]['id'] : 0;
+
+                $issue = $gitlab->createIssue($config['gitlab-project'], $title,
                 $description, $dateCreated, $assigneeId, $creatorId, $labels,
-                $confidential);
+                $confidential, $milestone);
 
             echo "Created a GitLab issue #{$issue['iid']} for Trac ticket #{$ticket_id} : {$config['trac-clean-url']}/tickets/{$ticket_id}\n";
 
@@ -55,23 +86,24 @@ do {
             $attachments = $trac->getAttachments($ticket_id);
 
             /*
+             * Create a transliterator for treating file names with special
+             * characters in them.
+             */
+            $trans = \Transliterator::create('Latin-ASCII');
+
+            /*
              * Add files attached to Trac ticket to new Gitlab issue.
              */
             foreach ($attachments as $a) {
-                $a['filename'] = str_replace(
-                    ['ä', 'ö', 'ü', 'Ä', 'Ö', 'Ü', 'ß'],
-                    ['ae', 'oe', 'ue', 'Ae', 'Oe', 'Ue', 'ss'],
-                    $a['filename']
-                );
+                // Transliterate file name, using only "safe" characters.
+                $filename = $trans->transliterate($a['filename']);
 
-                // TODO: Thomas! WTF! FUCK! MACHEN! SOFORT!
+                file_put_contents($filename, base64_decode($a['content']));
 
-                file_put_contents($a['filename'], base64_decode($a['content']));
+                $gitlab->createIssueAttachment($config['gitlab-project'], $issue['iid'], $filename, $a['author']);
+                unlink($filename);
 
-                $gitlab->createIssueAttachment($config['gitlab-project'], $issue['iid'], $a['filename'], $a['author']);
-                unlink($a['filename']);
-
-                echo "\tAttached file " . $a['filename'] . " to issue " . $issue['iid'] . ".\n";
+                echo "\tAttached file " . $filename . " to issue " . $issue['iid'] . ".\n";
             }
 
             // Close issue if Trac ticket was closed.
@@ -85,6 +117,17 @@ do {
                     $gitlab->closeIssue($config['gitlab-project'], $issue['iid']);
                 }
             }
+
+            // Close milestone if necessary.
+            if (is_array($ticket[3]) && $ticket[3]['milestone'] !== '' &&
+                !in_array($milestones[$ticket[3]['milestone']]['id'], $closedMilestones)
+            ) {
+                $gitlab->closeMilestone($config['gitlab-project'], $milestones[$ticket[3]['milestone']]['id']);
+                $closedMilestones[] = $milestones[$ticket[3]['milestone']]['id'];
+
+                echo "\tClosed milestone " . $ticket[3]['milestone'] . ".\n";
+            }
+
         } catch (Exception $e) {
             throw $e;
             echo "Error creating issue for ticket #{$ticket_id}\n";

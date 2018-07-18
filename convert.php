@@ -14,7 +14,11 @@ $steps  = [
     'comments' => __DIR__ . '/steps/add-comments.php',
 ];
 
-$result = ['issues' => [8641 => 398]];
+if (!class_exists('Transliterator')) {
+    die("PHP extension intl with Transliterator class is needed.\n");
+}
+
+$result = [];
 foreach ($steps as $number => $step) {
     $result[$number] = require $step;
 }

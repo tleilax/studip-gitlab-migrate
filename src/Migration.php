@@ -156,7 +156,8 @@ class Migration
 			// Close issue if Trac ticket was closed.
 			if ($ticket[3]['status'] === 'closed') {
 				$this->gitLab->closeIssue($gitLabProject, $issue['iid'],
-					$ticket[4][0]['time']['__jsonclass__'][1], $ticket[4][0]['author']);
+                    isset($ticket[4]) ? $ticket[4][0]['time']['__jsonclass__'][1] : $ticket[3]['_ts'],
+                    isset($ticket[4]) ? $ticket[4][0]['author'] : '');
 			}
 
 		}

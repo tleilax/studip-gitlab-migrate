@@ -69,16 +69,21 @@ class GitLab
      * @param  int      $authorId     Numeric user id of the user who created the issue. Only used in admin mode. Can be null.
      * @param  array    $labels       Array of string labels to be attached to the issue. Analoguous to trac keywords.
 	 * @param  bool     $confidential Is this issue confidential?
+	 * @para,  int      $milestoneId  Optional ID of a milestone to assign this issue to
      * @return  Gitlab\Model\Issue
 	 */
-	public function createIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, $confidential = false) {
+	public function createIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels,
+								$confidential = false, $milestoneId = 0
+	) {
 		try {
 			// Try to add, potentially as an admin (SUDO authorId)
-			$issue = $this->doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, $confidential, $this->isAdmin);
+			$issue = $this->doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId,
+				$labels, $confidential, $milestoneId, $this->isAdmin);
 		} catch (\Gitlab\Exception\RuntimeException $e) {
 			// If adding has failed because of SUDO (author does not have access to the project), create an issue without SUDO (as the Admin user whose token is configured)
 			if ($this->isAdmin) {
-				$issue = $this->doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, $confidential, false);
+				$issue = $this->doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId,
+					$labels, $confidential, $milestoneId, false);
 			} else {
 				// If adding has failed for some other reason, propagate the exception back
 				throw $e;
@@ -170,8 +175,41 @@ class GitLab
 		}
     }
 
+    /**
+	 * Gets milestones of project.
+	 * @param string $projectId project to check
+	 * @param array  $ids get only milestones with the given IDs.
+	 * @param string $state if set, return only milestones with the given status
+     * @param string $search optional filter on milestone title or description
+	 * @return array
+     */
+    public function getMilestones($projectId, $ids = [], $state = '', $search = '') {
+    	$parameters = [];
+    	if (count($ids) > 0) {
+    		$parameters['iids'] = $ids;
+		}
+		if ($state !== '') {
+    		$parameters['state'] = $state;
+		}
+		if ($search !== '') {
+    		$parameters['search'] = $search;
+		}
+		return $this->client->api('milestones')->all($projectId, $parameters);
+	}
+
+	public function createMilestone($projectId, $title, $description = '', $dueDate = '', $startDate = '') {
+		return $this->client->api('milestones')->create($projectId,
+			['title' => $title, 'description' => $description, 'due_date' => $dueDate, 'start_date' => $startDate]);
+	}
+
+	public function closeMilestone($projectId, $id) {
+    	return $this->client->api('milestones')->update($projectId, $id, ['state_event' => 'close']);
+	}
+
 	// Actually creates the issue
-	private function doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels, $confidential, $isAdmin) {
+	private function doCreateIssue($projectId, $title, $description, $createdAt, $assigneeId, $authorId, $labels,
+								   $confidential, $milestoneId = 0, $isAdmin
+	) {
 		$issueProperties = array(
 			'title' => $title,
 			'description' => $description,
@@ -181,6 +219,9 @@ class GitLab
 		);
 		if ($confidential) {
 			$issueProperties['confidential'] = true;
+        }
+		if ($milestoneId !== '') {
+			$issueProperties['milestone_id'] = $milestoneId;
         }
 		if ($isAdmin) {
 			$issueProperties['sudo'] = $authorId;
