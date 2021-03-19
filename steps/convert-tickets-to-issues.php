@@ -1,7 +1,13 @@
 <?php
 use Trac2GitLab\Migration;
 
-$issue_mapping = [];
+$cache = Trac2GitLab\Cache::getInstance();
+// Maps svn tickets to gitlab issues
+$issue_mapping = $cache->get('issue-mapping', []);
+// Trac Milestones that have already been created in Gitlab.
+$milestones = $cache->get('milestones', []);
+// Milestones that have already been migrated and closed.
+$closedMilestones = $cache->get('closed-milestones', []);
 
 // Actually migrate
 $migration = new Migration(
@@ -16,14 +22,12 @@ $trac = $migration->trac;
 
 $trac_client = $trac->getClient();
 $gitlab = $migration->gitLab;
-$gitlab_users = $gitlab->listUsers();
+$gitlab_users = []; // $gitlab->listUsers();
 
 $step_size = 50;
 $page = 1;
-// Trac Milestones that have already been created in Gitlab.
-$milestones = [];
-// Milestones that have already been migrated and closed.
-$closedMilestones = [];
+
+stream_set_blocking(STDIN, 0);
 
 do {
     $query = "{$config['trac-query']}&page={$page}&max={$step_size}";
@@ -35,6 +39,16 @@ do {
 
 
     foreach ($ticket_ids as $ticket_id) {
+        while ($c = fgetc(STDIN)) {
+            if ($c === 'q') {
+                echo "! Stopping process\n";
+                exit;
+            }
+        }
+        if (isset($issue_mapping[$ticket_id])) {
+            continue;
+        }
+
         try {
             $ticket = $trac_client->execute('ticket.get', [$ticket_id]);
 
@@ -66,6 +80,7 @@ do {
                         'id' => $g['id'],
                         'closed' => is_array($m['completed'])
                     ];
+                    $cache->set('milestones', $milestones);
                     echo "Created milestone " . $ticket[3]['milestone'] . ".\n";
                 }
             }
@@ -79,9 +94,10 @@ do {
                 $description, $dateCreated, $assigneeId, $creatorId, $labels,
                 $confidential, $milestone);
 
-            echo "Created a GitLab issue #{$issue['iid']} for Trac ticket #{$ticket_id} : {$config['trac-clean-url']}/tickets/{$ticket_id}\n";
+            echo "Created a GitLab issue #{$issue['iid']} for Trac ticket #{$ticket_id} : {$config['trac-clean-url']}/ticket/{$ticket_id}\n";
 
-            $mapping[$ticket_id] = $issue['iid'];
+            $issue_mapping[$ticket_id] = $issue['iid'];
+            $cache->set('issue-mapping', $issue_mapping);
 
             $attachments = $trac->getAttachments($ticket_id);
 
@@ -100,10 +116,11 @@ do {
 
                 file_put_contents($filename, base64_decode($a['content']));
 
-                $gitlab->createIssueAttachment($config['gitlab-project'], $issue['iid'], $filename, $a['author']);
+//                $gitlab->createIssueAttachment($config['gitlab-project'], $issue['iid'], $filename, $a['author']);
+                $gitlab->createIssueAttachment($config['gitlab-project'], $issue['iid'], $filename, null);
                 unlink($filename);
 
-                echo "\tAttached file " . $filename . " to issue " . $issue['iid'] . ".\n";
+                echo "\tAttached file {$filename} to issue {$issue['iid']}\n";
             }
 
             // Close issue if Trac ticket was closed.
@@ -111,7 +128,8 @@ do {
                 if (isset($ticket[4])) {
                     $gitlab->closeIssue(
                         $config['gitlab-project'], $issue['iid'],
-                        $ticket[4][0]['time']['__jsonclass__'][1], $ticket[4][0]['author']
+                        $ticket[4][0]['time']['__jsonclass__'][1]
+//                        $ticket[4][0]['time']['__jsonclass__'][1], $ticket[4][0]['author']
                     );
                 } else {
                     $gitlab->closeIssue($config['gitlab-project'], $issue['iid']);
@@ -124,6 +142,8 @@ do {
             ) {
                 $gitlab->closeMilestone($config['gitlab-project'], $milestones[$ticket[3]['milestone']]['id']);
                 $closedMilestones[] = $milestones[$ticket[3]['milestone']]['id'];
+                $cache->set('closed-milestones', $closedMilestones);
+
 
                 echo "\tClosed milestone " . $ticket[3]['milestone'] . ".\n";
             }
@@ -138,7 +158,8 @@ do {
 
 } while (count($ticket_ids) > 0);
 
-return $migration->migrateQuery(
-    $config['trac-query'],
-    $config['gitlab-project']
-);
+return $issue_mapping;
+//$migration->migrateQuery(
+//    $config['trac-query'],
+//    $config['gitlab-project']
+//);

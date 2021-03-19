@@ -3,6 +3,11 @@
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/includes/functions.php';
 
+Trac2GitLab\Cache::setPath(__DIR__ . '/cache');
+if ($_SERVER['argc'] > 1 && $_SERVER['argv'][1] === '--clear-cache') {
+    Trac2GitLab\Cache::getInstance()->clear();
+}
+
 $config = require __DIR__ . '/includes/config.php';
 $config['trac-clean-url'] = preg_replace('/(?<=:\/\/).*?:.*?@|\/login/', '${1}', $config['trac-url']);
 
