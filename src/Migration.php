@@ -250,6 +250,3 @@ class Migration
 		return $text;
 	}
 }
-
-
-?>

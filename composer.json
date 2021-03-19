@@ -1,7 +1,7 @@
 {
     "name": "dachaz/trac-to-gitlab",
     "version": "1.0.1",
-    "type": "CLI utility",
+    "type": "package",
     "description": "Command line utility to migrate Trac tickets to GitLab issues",
     "homepage": "https://github.com/Dachaz/trac-to-gitlab",
     "license": "WTFPL",
@@ -16,7 +16,7 @@
         "ext-mbstring": "*",
         "ext-json": "*",
         "m4tthumphrey/php-gitlab-api": "9.9.0",
-        "fguillot/json-rpc": "1.0.0",
+        "fguillot/json-rpc": "dev-master",
         "php-http/guzzle6-adapter": "^1.1"
     },
     "autoload": {

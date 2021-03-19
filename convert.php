@@ -11,7 +11,7 @@ $steps  = [
     'commits'  => __DIR__ . '/steps/clone-svn-repository.php',
     'history'  => __DIR__ . '/steps/rewrite-history.php',
     'push'     => __DIR__ . '/steps/push-repository.php',
-    'comments' => __DIR__ . '/steps/add-comments.php',
+//    'comments' => __DIR__ . '/steps/add-comments.php',
 ];
 
 if (!class_exists('Transliterator')) {

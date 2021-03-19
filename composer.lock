@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a004bc34bf09724ebf546d41f934ddb7",
+    "content-hash": "f42b7c7718a0b7997c56aba15b814e65",
     "packages": [
         {
             "name": "clue/stream-filter",
@@ -60,21 +60,26 @@
         },
         {
             "name": "fguillot/json-rpc",
-            "version": "v1.0.0",
+            "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/fguillot/JsonRPC.git",
-                "reference": "5a11f1414780a200f09b78d20ab72b5cee4faa95"
+                "url": "https://github.com/matasarei/JsonRPC.git",
+                "reference": "8e8832f61c3f450b067c0c5c3020bcde4ee88f01"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fguillot/JsonRPC/zipball/5a11f1414780a200f09b78d20ab72b5cee4faa95",
-                "reference": "5a11f1414780a200f09b78d20ab72b5cee4faa95",
+                "url": "https://api.github.com/repos/matasarei/JsonRPC/zipball/8e8832f61c3f450b067c0c5c3020bcde4ee88f01",
+                "reference": "8e8832f61c3f450b067c0c5c3020bcde4ee88f01",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0"
+                "ext-json": "*",
+                "php": ">=5.4"
             },
+            "require-dev": {
+                "phpunit/phpunit": "4.8.*"
+            },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-0": {
@@ -91,9 +96,12 @@
                 }
             ],
             "description": "Simple Json-RPC client/server library that just works",
-            "homepage": "https://github.com/fguillot/JsonRPC",
-            "abandoned": true,
-            "time": "2015-07-01T19:50:31+00:00"
+            "homepage": "https://github.com/matasarei/JsonRPC",
+            "support": {
+                "issues": "https://github.com/matasarei/JsonRPC/issues",
+                "source": "https://github.com/matasarei/JsonRPC/tree/master"
+            },
+            "time": "2020-02-07T00:12:56+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -920,13 +928,16 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "fguillot/json-rpc": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.3.0",
+        "php": ">=5.6.0",
         "ext-mbstring": "*",
         "ext-json": "*"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "2.0.0"
 }
